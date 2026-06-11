@@ -1,75 +1,124 @@
 alunos = []
-series = ('1', '2', '3', '4', '5', '6', '7', '8', '9', "1°", "2°", "3°")
+anos = ('1', '2', '3', '4', '5', '6', '7', '8', '9', "1°", "2°", "3°")
 turmas = ("A", "B", "C")
-notas = []
-matriz_nota = []
-
-def cadastrar_aluno ():
-    while True:  
+quantidade_alunos = 0
+def cadastrar_aluno():
+    while True:
+        print("\n---CADASTRAR ALUNO--- ")
         aluno = {}
 
         aluno['nome'] = input("Informe o nome do aluno: ")
-        
-        try:
-         aluno['idade'] = int(input("Informe a idade do aluno: "))
-        except ValueError:
-            print("Dados inváldos")
-            return None
-        
-        if aluno["idade"] < 0:
-           print("A idade não pode ser menor que '0' ")
-           return None
-        
-        aluno['serie'] = input(f"Informe a serie do {aluno['nome']} (ensino fundamental: 1 a 9) | (ensino medio: 1° a 3°): ")
-        if aluno['serie'] not in series:
-           print("Numero de serie inválido")
-           return
-        
-        aluno['turma'] = input(F"Informe a turma do {aluno['nome']}: ").upper()
-        if aluno['turma'] not in turmas:
-           print("Turma inválida")
-           return
-        
-        alunos.append(aluno)
-        op = input("Deseja cadastrar novamente? [S][N]").upper()
 
-        if op not in ('S','N'):
-           print("Opção inválida!")
-           return None
+        try:
+            aluno['idade'] = int(input("Informe a idade do aluno: "))
+        except ValueError:
+            print("Dados inválidos")
+            continue
+
+        if aluno["idade"] < 0:
+            print("A idade não pode ser menor que 0")
+            continue
+
+        aluno['turma'] = input(
+            f"Informe a série/turma do {aluno['nome']} : "
+)
+        
+        aluno['nota'] = []
+
+        alunos.append(aluno)
+        cadastrar_aluno += 1
+
+        op = input("Deseja cadastrar novamente? [S][N] ").upper()
 
         if op == "N":
-           
-           print("Cadastro realizado!")
-           break
+            print("Cadastro realizado!")
+            break
+
 
 def lancar_nota():
-   nome_busca = input("Informe o nome do aluno que deseja: ")
-   soma = 0 
+    while True:
+        print("\n---LANÇAR NOTAS--- ")
+        nome_busca = input("Informe o nome do aluno: ")
+        encontrado = False
 
-   for aluno in alunos:
-      if aluno['nome'] == nome_busca:
-        for l in range (len(alunos)):
-            linha = []
-            
-            for c in range (len(alunos)):
-                for x in range (4):
-            
-                    nota = float(input(f"informe a {x+1}º nota do {aluno['nome']}: "))
+        for aluno in alunos:
+            if aluno['nome'].lower() == nome_busca.lower():
+
+                encontrado = True
+                soma = 0
+
+                for c in range(4):
+                    nota = float(input(f"Informe a {c+1}ª nota do {aluno['nome']}: "))
+                    if nota > 10 and nota <0:
+                        print("Nota inválida!")
+                        continue
+                    aluno['nota'].append(nota)
                     soma += nota
-                    notas.append(nota)
-                    linha.append(nota)
-                matriz_nota.append(linha)
-        print(matriz_nota)
+
+                aluno['media'] = soma / 4
+
+                print("Notas lançadas com sucesso!")
+                break
+
+        if not encontrado:
+            print("Aluno não encontrado")
+            continue
+
+        op = input("Deseja lançar notas novamente? [S][N] ").upper()
+
+        if op == "N":
+            print("Lançamento de notas finalizado!")
+            break
+
+
+def consultar_aluno():
+    print("\n---CONSULTAR ALUNO--- ")
+    nome_busca = input("Informe o nome do aluno que deseja: ")
+    encontrado = False
+
+    for aluno in alunos:
+        if aluno['nome'].lower() == nome_busca.lower():
+            encontrado = True
+
+            print(f"Nome: {aluno['nome']}")
+            print(f"Idade: {aluno['idade']}")
+            print(f"Ano: {aluno['ano']} ano")
+            print(f"Turma: {aluno['turma']}")
+            print(f"Notas: {aluno['nota']}")
+            print(f"Média: {aluno['media']}")
+
+            if aluno['media'] >=7:
+                print("Aprovado!")
+
+            elif aluno['media'] >= 5:
+                print("Recuperação")
+
+            else:
+                print("Reprovado")
+
+    if not encontrado:
+        print("Aluno não encontrado")
+
+def relatorio_geral():
+    print("\n---RELATÓRIO GERAL--- ")
+    print(f"Quantidade de alunos: {quantidade_alunos}")
+
+    
 
 def menu():
-   while True:
-    op = int(input("1-CADASTRAR 2-LANÇAR NOTA"))
+    while True:
+        op = int(input(
+            "1-CADASTRAR 2-LANÇAR NOTA 3-CONSULTAR ALUNO: "
+        ))
 
-    if op == 1:
-        cadastrar_aluno()
+        if op == 1:
+            cadastrar_aluno()
 
-    elif op == 2:
-       lancar_nota()
+        elif op == 2:
+            lancar_nota()
+
+        elif op == 3:
+            consultar_aluno()
 
 
 menu()
