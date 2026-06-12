@@ -1,12 +1,16 @@
 alunos = []
-anos = ('1', '2', '3', '4', '5', '6', '7', '8', '9', "1°", "2°", "3°")
-turmas = ("A", "B", "C")
-quantidade_alunos = 0
+matriz_nota = []
+medias = []
+aprovado = 0
+reprovado = 0
+recuperação = 0
 def cadastrar_aluno():
     while True:
-        print("\n---CADASTRAR ALUNO--- ")
         aluno = {}
+        aluno['notas'] = []
+        aluno['media'] = 0
 
+        print(" ---CADASTRAR ALUNO---")
         aluno['nome'] = input("Informe o nome do aluno: ")
 
         try:
@@ -15,110 +19,179 @@ def cadastrar_aluno():
             print("Dados inválidos")
             continue
 
-        if aluno["idade"] < 0:
-            print("A idade não pode ser menor que 0")
-            continue
-
-        aluno['turma'] = input(
-            f"Informe a série/turma do {aluno['nome']} : "
-)
-        
-        aluno['nota'] = []
+        aluno['turma'] = input("Qual é a turma do aluno?: ")
 
         alunos.append(aluno)
-        cadastrar_aluno += 1
+        salvar_dados()
+        print("Aluno cadastrado com sucesso!!")
 
-        op = input("Deseja cadastrar novamente? [S][N] ").upper()
+        op = input("Deseja cadastrar novamente?: [S][N]").upper()
+
+        if op not in ("S", "N"):
+            print("Opção inválida!!")
+            continue
 
         if op == "N":
-            print("Cadastro realizado!")
             break
 
 
-def lancar_nota():
+def lancar_notas():
+    global aprovado, reprovado, recuperação
+
     while True:
-        print("\n---LANÇAR NOTAS--- ")
-        nome_busca = input("Informe o nome do aluno: ")
+        print("--- LANÇAR NOTAS ---")
+        nome = input("Informe o nome do aluno que deseja buscar: ")
         encontrado = False
 
-        for aluno in alunos:
-            if aluno['nome'].lower() == nome_busca.lower():
-
+        for i in range(len(alunos)):
+            if alunos[i]['nome'].lower() == nome.lower():
                 encontrado = True
+
+                notas = []
                 soma = 0
 
-                for c in range(4):
-                    nota = float(input(f"Informe a {c+1}ª nota do {aluno['nome']}: "))
-                    if nota > 10 and nota <0:
+                for x in range(4):
+                    nota = float(input(f"Informe a {x+1}° nota do aluno {alunos[i]['nome']}: "))
+
+                    if nota > 10 or nota < 0:
                         print("Nota inválida!")
                         continue
-                    aluno['nota'].append(nota)
+
+                    notas.append(nota)
                     soma += nota
 
-                aluno['media'] = soma / 4
+                media_aluno = soma / 4
 
-                print("Notas lançadas com sucesso!")
+                if media_aluno >= 7:
+                    aprovado += 1
+                elif media_aluno >= 5:
+                    recuperação += 1
+                else:
+                    reprovado += 1
+
+                alunos[i]['notas'] = notas
+                alunos[i]['media'] = media_aluno
+
+                salvar_dados()
+                matriz_nota.append(notas)
+                medias.append(media_aluno)
+
                 break
 
         if not encontrado:
-            print("Aluno não encontrado")
+            print("Aluno não encontrado!")
+
+        op = input("Deseja lançar notas novamente? [S/N] ").upper()
+
+        if op not in ("S", "N"):
+            print("Opção inválida!")
             continue
 
-        op = input("Deseja lançar notas novamente? [S][N] ").upper()
-
         if op == "N":
-            print("Lançamento de notas finalizado!")
             break
 
+def consultar():
+    while True:
+        print(" ---CONSULTAR ALUNO---")
+        nome = input("Informe o nome do aluno que deseja encontrar: ")
+        encontrado = False
 
-def consultar_aluno():
-    print("\n---CONSULTAR ALUNO--- ")
-    nome_busca = input("Informe o nome do aluno que deseja: ")
-    encontrado = False
+        for x in range(len(alunos)):
+            if alunos[x]['nome'].lower() == nome.lower():
+                encontrado = True
+                print(" ===ALUNO===")
+                print(f"NOME: {alunos[x]['nome']}")
+                print(f"IDADE: {alunos[x]['idade']}")
+                print(f"TURMA: {alunos[x]['turma']}")
+                print(f"NOTAS: {alunos[x]['notas']}")
+                print(f"MEDIA: {alunos[x]['media']}")
+
+        if not encontrado:
+            print("Aluno não encontrado!!")
+            return
+
+        op = input("Deseja consultar novamente? [S/N] ").upper()
+
+        if op not in ("S", "N"):
+            print("Opção inválida!")
+            continue
+
+        if op == "N":
+            break
+
+def relatorio():
+    print(" ---RELATÓRIO GERAL---")
+    print(f'QUANTIDADE DE ALUNOS: {len(alunos)}')
+
+    if len(medias) > 0:
+        media_turma = sum(medias) / len(medias)
+        print(f"MEDIA DA TURMA: {media_turma}")
+    else:
+        print("MEDIA DA TURMA: sem dados ainda")
+
+    print(f'APROVADOS: {aprovado}')
+    print(f'RECUPERAÇÕES: {recuperação}')
+    print(f'REPROVADOS: {reprovado}')
+
+    if len(alunos) > 0:
+        melhor_aluno = alunos[0]
+        for i in range(1, len(alunos)):
+            if alunos[i]['media'] > melhor_aluno['media']:
+                melhor_aluno = alunos[i]
+
+        print(f"MELHOR ALUNO: {melhor_aluno['nome']} - {melhor_aluno['media']}")
+
+        pior_aluno = alunos[0]
+        for i in range(1, len(alunos)):
+            if alunos[i]['media'] < pior_aluno['media']:
+                pior_aluno = alunos[i]
+
+        print(f"PIOR ALUNO: {pior_aluno['nome']} - {pior_aluno['media']}")
+
+
+def salvar_dados():
+    arquivo = open("alunos.txt", "w", encoding="utf-8")
 
     for aluno in alunos:
-        if aluno['nome'].lower() == nome_busca.lower():
-            encontrado = True
+        arquivo.write(
+            f"{aluno['nome']};{aluno['idade']};{aluno['turma']};"
+            f"{aluno.get('notas', [])};{aluno.get('media', 0)}\n"
+        )
 
-            print(f"Nome: {aluno['nome']}")
-            print(f"Idade: {aluno['idade']}")
-            print(f"Ano: {aluno['ano']} ano")
-            print(f"Turma: {aluno['turma']}")
-            print(f"Notas: {aluno['nota']}")
-            print(f"Média: {aluno['media']}")
-
-            if aluno['media'] >=7:
-                print("Aprovado!")
-
-            elif aluno['media'] >= 5:
-                print("Recuperação")
-
-            else:
-                print("Reprovado")
-
-    if not encontrado:
-        print("Aluno não encontrado")
-
-def relatorio_geral():
-    print("\n---RELATÓRIO GERAL--- ")
-    print(f"Quantidade de alunos: {quantidade_alunos}")
-
-    
+    arquivo.close()
 
 def menu():
     while True:
-        op = int(input(
-            "1-CADASTRAR 2-LANÇAR NOTA 3-CONSULTAR ALUNO: "
-        ))
+        print("\n===== MENU PRINCIPAL =====")
+        print("1 - Cadastrar aluno")
+        print("2 - consultar alunos")
+        print("3 - Lançar notas")
+        print("4 - Relatório geral")
+        print("5 - Salvar dados")
+        print("6 - Sair")
+        print("==========================")
 
-        if op == 1:
+        opcao = input("Escolha uma opção: ")
+
+        if opcao == "1":
             cadastrar_aluno()
 
-        elif op == 2:
-            lancar_nota()
+        elif opcao == "2":
+            consultar()
 
-        elif op == 3:
-            consultar_aluno()
+        elif opcao == "3":
+            lancar_notas()
 
+        elif opcao == "4":
+            relatorio()
+
+        elif opcao == "5":
+            salvar_dados()
+
+        elif opcao == "6":
+            break
+
+        else:
+            print("Opção inválida! Tente novamente.")
 
 menu()
